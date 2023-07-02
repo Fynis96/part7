@@ -1,5 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
+import { setNotificationAndTimer } from "./reducers/notificationReducer";
 import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
@@ -8,8 +10,8 @@ import Create from "./components/Create";
 import Togglable from "./components/Togglable";
 
 const App = () => {
+  const dispatch = useDispatch();
   const [blogs, setBlogs] = useState([]);
-  const [errorMessage, setErrorMessage] = useState("some error happened...");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
@@ -18,7 +20,6 @@ const App = () => {
   useEffect(() => {
     blogService.getAll().then((incomingBlogs) => {
       setBlogs(incomingBlogs);
-      setErrorMessage(null);
     });
   }, []);
 
@@ -46,10 +47,7 @@ const App = () => {
       setUsername("");
       setPassword("");
     } catch (exception) {
-      setErrorMessage("Wrong credentials");
-      setTimeout(() => {
-        setErrorMessage(null);
-      }, 5000);
+      dispatch(setNotificationAndTimer("Wrong credentials", 5));
       console.log(exception);
     }
   };
@@ -90,10 +88,7 @@ const App = () => {
     blogFormRef.current.toggleVisibility();
     const returnedBlog = await blogService.create(blogObject);
     setBlogs(blogs.concat(returnedBlog));
-    setErrorMessage(`${returnedBlog.title} was successfully added`);
-    setTimeout(() => {
-      setErrorMessage(null);
-    }, 5000);
+    dispatch(setNotificationAndTimer(`${returnedBlog.title} was successfully added`, 5));
   };
 
   const removeBlog = async (blogId) => {
@@ -108,7 +103,7 @@ const App = () => {
 
   return (
     <div>
-      <Notification message={errorMessage} />
+      <Notification />
       {user === null ? (
         loginForm()
       ) : (
