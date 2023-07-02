@@ -7,7 +7,8 @@ module.exports = {
   },
   "extends": [ 
       "eslint:recommended",
-      "plugin:react/recommended"
+      "plugin:react/recommended",
+      "prettier"
   ],
   "parserOptions": {
       "ecmaFeatures": {
@@ -29,11 +30,11 @@ module.exports = {
       "linebreak-style": 0,
       "quotes": [
           "error",
-          "single"
+          "double"
       ],
       "semi": [
           "error",
-          "never"
+          "always"
       ],
       "eqeqeq": "error",
       "no-trailing-spaces": "error",
