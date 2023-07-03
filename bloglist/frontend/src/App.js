@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useRef } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setNotificationAndTimer } from "./reducers/notificationReducer";
+import { initializeBlogs, createBlog, incrementLike, deleteBlog } from "./reducers/blogReducer";
 import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
@@ -11,17 +12,16 @@ import Togglable from "./components/Togglable";
 
 const App = () => {
   const dispatch = useDispatch();
-  const [blogs, setBlogs] = useState([]);
+  const blogs = useSelector(state => state.blogs);
+  const copyOfBlogs = [...blogs];
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
   const blogFormRef = useRef();
 
   useEffect(() => {
-    blogService.getAll().then((incomingBlogs) => {
-      setBlogs(incomingBlogs);
-    });
-  }, []);
+    dispatch(initializeBlogs());
+  }, [dispatch]);
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
@@ -79,16 +79,14 @@ const App = () => {
       </button>
     </form>
   );
-  const updateLike = async (blogId, blogObject) => {
-    const returnedBlog = await blogService.update(blogId, blogObject);
-    setBlogs(blogs.map((blog) => (blog.id !== blogId ? blog : returnedBlog)));
+  const updateLike = blogId => {
+    dispatch(incrementLike(blogId));
   };
 
   const addBlog = async (blogObject) => {
     blogFormRef.current.toggleVisibility();
-    const returnedBlog = await blogService.create(blogObject);
-    setBlogs(blogs.concat(returnedBlog));
-    dispatch(setNotificationAndTimer(`${returnedBlog.title} was successfully added`, 5));
+    dispatch(createBlog(blogObject));
+    dispatch(setNotificationAndTimer(`${blogObject.title} was successfully added`, 5));
   };
 
   const removeBlog = async (blogId) => {
@@ -96,8 +94,7 @@ const App = () => {
     if (
       window.confirm(`Are you sure you wish to delete ${blogTitle[0].title}`)
     ) {
-      await blogService.remove(blogId);
-      setBlogs(blogs.filter((blog) => blog.id !== blogId));
+      dispatch(deleteBlog(blogId));
     }
   };
 
@@ -121,7 +118,7 @@ const App = () => {
           <Togglable buttonLabel="new blog" ref={blogFormRef}>
             <Create createBlog={addBlog} />
           </Togglable>
-          {blogs
+          {copyOfBlogs
             .sort((a, b) => b.likes - a.likes)
             .map((blog) => (
               <Blog

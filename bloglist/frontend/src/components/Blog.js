@@ -2,7 +2,6 @@ import { useState } from "react";
 
 const Blog = ({ blog, updateLike, user, removeBlog }) => {
   const [toggled, setToggle] = useState(true);
-  const [likes, setLikes] = useState(blog.likes);
 
   const blogStyle = {
     paddingTop: 10,
@@ -12,15 +11,7 @@ const Blog = ({ blog, updateLike, user, removeBlog }) => {
     marginBottom: 5,
   };
   const upLike = () => {
-    let newLike = likes + 1;
-    updateLike(blog.id, {
-      user: blog.user.id,
-      likes: newLike,
-      author: blog.author,
-      title: blog.title,
-      url: blog.url,
-    });
-    setLikes(newLike);
+    updateLike(blog.id);
   };
 
   return (
@@ -52,7 +43,7 @@ const Blog = ({ blog, updateLike, user, removeBlog }) => {
             </li>
             <li className="url">{blog.url}</li>
             <li className="likes">
-              likes {likes}{" "}
+              likes {blog.likes}{" "}
               <button
                 className="likesbtn"
                 onClick={() => {
